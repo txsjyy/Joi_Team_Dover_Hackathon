@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Custom Video Controls</title>
+<style>
+  /* Removes any default browser styling */
+  .video-player {
+    border: none; /* Optional: removes border if any */
+    cursor: pointer; /* Indicates the video can be interacted with */
+    z-index:999;
+    position:relative;
+    width:399px;
+    height:412px;
+  }
+</style>
+</head>
+<body>
+
+<video id="myVideo" class="video-player" width="320" height="240" loop>
+  <source src="avatar.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+<script>
+  const video = document.getElementById('myVideo');
+
+  // Toggle play/pause on video click
+  video.addEventListener('click', function() {
+    if (video.paused) {
+      video.play();
+    } else {
+      video.pause();
+    }
+  });
+
+  // Optionally, toggle play/pause with spacebar
+  document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space' && event.target === document.body) { // Prevent triggering when focused on a button or input
+      event.preventDefault(); // Prevent scrolling when space is pressed
+      if (video.paused) {
+        video.play();
+      } else {
+        video.pause();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -12,7 +12,13 @@
         <button type="button" onclick="init()">Start Demo</button>
         <div id="webcam-container"></div>
         <div id="label-container"></div>
-        <div id="video-container"></div>
+        <div id="video-container">
+            <!-- Added muted attribute for autoplay compatibility -->
+            <video id="myVideo" class="video-player" width="320" height="240" loop>
+                <source src="avatar.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
         <div class="fuel-prices">
             <div class="fuel-option regular">
                 <h4>REGULAR UNLEADED</h4>
@@ -33,60 +39,89 @@
                 <div class="octane-rating">93</div>
             </div>
         </div>
-    <div>   
-        <script>;(function(){function initWidget(){var id='movio_frame_'+Date.now();var container=document.getElementById('video-container'); container.insertAdjacentHTML('beforeend','<iframe id="'+id+'" frameborder="0" style="z-index:999;position:relative;width:399px;height:412px;display:none" src="https://app.heygen.com/widget?data=eyJ2aWRlb19pZCI6IjYwODA1MzE2ODIzODRiYTBhYzk3NDczZDZiMTY1MGZlIiwiY3JvcF9zaGFwZSI6Im5vbmUiLCJzaG93X3BiIjp0cnVlLCJ1c2VybmFtZSI6IjkyOWQ4ZDNiZjY4YzQyMWU4MWFkZTIxM2JkY2IyYWQwIiwic2lkIjoibm9fc2lkIn0=&rid=YjhiuvAq"></iframe>');var rid="YjhiuvAq";window.addEventListener('message',function(message){var iframe=document.getElementById(id);var data=message.data;if(data.source!=='movio-widget'||data.rid!==rid)return;if(data.action==='loaded'){if(iframe){iframe.style.display='block';iframe.style.width = "212px";iframe.style.height = "265px";}}else if(data.action==='close'){if(iframe){iframe.style.width = "90px";iframe.style.height = "90px";}}})};if(document.readyState==='complete'){initWidget()}else{document.addEventListener('DOMContentLoaded',initWidget)}})();</script>
+    </div> <!-- Fixed closing tag -->
+    
+    <script>
+        const video = document.getElementById('myVideo');
+
+        // Toggle play/pause on video click
+        video.addEventListener('click', function() {
+            if (video.paused) {
+                video.play();
+            } else {
+                video.pause();
+            }
+        });
+
+        // Optionally, toggle play/pause with spacebar
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && event.target === document.body) { 
+                event.preventDefault(); // Prevent scrolling when space is pressed
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+            }
+        });
+    </script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <script type="text/javascript">
+        
         // Teachable Machine initialization and predict function goes here
-        // More API functions here:
-            // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
-            // the link to your model provided by Teachable Machine export panel
-            const URL = "https://teachablemachine.withgoogle.com/models/7FH6XPnn3/";
+        const URL = "https://teachablemachine.withgoogle.com/models/7FH6XPnn3/";
 
-            let model, webcam, labelContainer, maxPredictions;
+        let model, webcam, labelContainer, maxPredictions;
 
-            // Load the image model and setup the webcam
-            async function init() {
+        // Load the image model and setup the webcam
+        async function init() {
+            try {
+
+                document.querySelector("button").style.display = "none";
                 const modelURL = URL + "model.json";
                 const metadataURL = URL + "metadata.json";
 
-                // load the model and metadata
-                // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-                // or files from your local hard drive
-                // Note: the pose library adds "tmImage" object to your window (window.tmImage)
                 model = await tmImage.load(modelURL, metadataURL);
                 maxPredictions = model.getTotalClasses();
 
                 // Convenience function to setup a webcam
                 const flip = true; // whether to flip the webcam
-                webcam = new tmImage.Webcam(200, 200, flip); // width, height, flip
+                webcam = new tmImage.Webcam(200, 200, flip);
                 await webcam.setup(); // request access to the webcam
                 await webcam.play();
                 window.requestAnimationFrame(loop);
 
-                // append elements to the DOM
                 document.getElementById("webcam-container").appendChild(webcam.canvas);
                 labelContainer = document.getElementById("label-container");
-                for (let i = 0; i < maxPredictions; i++) { // and class labels
+                for (let i = 0; i < maxPredictions; i++) {
                     labelContainer.appendChild(document.createElement("div"));
                 }
+            } catch (error) {
+                console.error("Initialization error:", error);
+                // Handle initialization errors, e.g., show an error message to the user
             }
+        }
 
-            async function loop() {
-                webcam.update(); // update the webcam frame
-                await predict();
-                window.requestAnimationFrame(loop);
-            }
+        async function loop() {
+            webcam.update(); // update the webcam frame
+            await predict();
+            window.requestAnimationFrame(loop);
+        }
 
-            // run the webcam image through the image model
-            async function predict() {
-                // predict can take in an image, video or canvas html element
+        // run the webcam image through the image model
+        async function predict() {
+            try {
                 const prediction = await model.predict(webcam.canvas);
                 const classPrediction = prediction[1].className + ": " + prediction[1].probability.toFixed(2);
                 labelContainer.childNodes[0].innerHTML = classPrediction;
+            } catch (error) {
+                console.error("Prediction error:", error);
+                // Handle prediction errors here
             }
+        }
     </script>
 </body>
 </html>

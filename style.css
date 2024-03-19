@@ -108,3 +108,13 @@ button:hover {
     align-items: center;
     overflow: hidden; /* Optional: Hide overflow */
 }
+
+
+.video-player {
+    border: none; /* Optional: removes border if any */
+    cursor: pointer; /* Indicates the video can be interacted with */
+    z-index:999;
+    position:relative;
+    width:399px;
+    height:412px;
+  }
